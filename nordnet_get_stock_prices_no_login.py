@@ -5,7 +5,6 @@ from datetime import datetime
 from datetime import date
 import os
 from nordnet_configuration import sharelist, prices_startdate, prices_filename
-from nordnet_login import nordnet_login
 
 # VISIT NORDNET #
 session = requests.Session()
