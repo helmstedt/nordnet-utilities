@@ -1,6 +1,6 @@
 # This program logs into a Nordnet account and extracts transactions as a csv file.
 # Handy for exporting to Excel with as few manual steps as possible.
-import requests 
+import requests
 from datetime import datetime
 from datetime import date
 from nordnet_configuration import accounts, transactions_startdate, transactions_filename
@@ -31,9 +31,9 @@ for portfolioname, id in accounts.items():
     payload['account_id'] = id
     data = session.get(url, params=payload)
     result = data.content.decode('utf-16')
-    result = result.replace('\t',';')
+    result = result.replace('\t', ';')
     result = result.splitlines()
-    
+
     firstline = True
     for line in result:
         # For first account and first line, we use headers and add an additional column
@@ -48,7 +48,7 @@ for portfolioname, id in accounts.items():
         elif line and firstline == False:
             # Fix because Nordnet sometimes adds one empty column too many
             if line.count(';') == 29:
-                line = line.replace('; ',' ')
+                line = line.replace('; ', ' ')
             transactions += line + ';' + portfolioname + '\n'
 
 # WRITE CSV OUTPUT TO FILE #
