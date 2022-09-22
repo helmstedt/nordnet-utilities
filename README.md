@@ -16,6 +16,12 @@ Step two
 
 * Run either of `nordnet_get_transactions.py`, `nordnet_get_stock_prices.py` or `nordnet_get_currencies.py` to get the data you are interested in.
 
+What's with the PowerShell script?
+=========
+
+Just an example of how to log in to Nordnet and extract some data with PowerShell.
+
+
 Questions
 =========
 
