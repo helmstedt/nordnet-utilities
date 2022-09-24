@@ -14,7 +14,7 @@ Step one
 Step two
 --------
 
-* Run either of `nordnet_get_transactions.py`, `nordnet_get_stock_prices.py` or `nordnet_get_currencies.py` to get the data you are interested in.
+* Run either of `nordnet_get_transactions.py`, `nordnet_get_stock_prices.py` `nordnet_get_currencies.py`, or  `nordnet_get_performance_graph.py` to get the data you are interested in.
 
 What's with the PowerShell script?
 =========
