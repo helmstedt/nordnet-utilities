@@ -1,47 +1,56 @@
-# This program extracts historical stock prices from Nordnet and saves to CSV.
-# Does not require a login to Nordnet.
+# Extracts historical stock prices from Nordnet and appends new data to a csv file.
+# A maximum period of 5 years is available with daily resolution.
+# Does not require login to Nordnet.
 import requests
 from datetime import datetime
 from datetime import date
 from nordnet_configuration import sharelist, prices_startdate, prices_filename
+from os.path import exists
+import csv
 
-# VISIT NORDNET #
-session = requests.Session()
-url = 'https://www.nordnet.dk/markedet'
-session.get(url)
-# Update headers
-session.headers['client-id'] = 'NEXT'
-session.headers['sub-client-id'] = 'NEXT'
+# Define fieldnames for csv and create list to store existing dates
+fieldnames = ['date', 'instrument', 'high', 'low', 'open', 'last', 'volume']
+datelist = []
 
-# A variable to store historical prices before saving to csv
-finalresult = ""
-finalresult += '"date";"price";"instrument"' + '\n'
-
-# LOOP TO REQUEST HISTORICAL PRICES  #
-for share in sharelist:
-    url = "https://www.nordnet.dk/api/2/instruments/historical/prices/" + \
-        share[1]
-    payload = {"from": prices_startdate, "fields": "last"}
-    data = session.get(url, params=payload)
-    jsondecode = data.json()
-
-    # Sometimes the final date is returned twice. A list is created to check for duplicates.
-    datelist = []
-    if jsondecode[0]['prices']:
-        for value in jsondecode[0]['prices']:
-            if 'last' in value:
-                price = str(value['last'])
-            elif 'close_nav' in value:
-                price = str(value['close_nav'])
-            price = price.replace(".", ",")
-            date = datetime.fromtimestamp(value['time'] / 1000)
-            date = datetime.strftime(date, '%Y-%m-%d')
-            # Only adds a date if it has not been added before
+# Prepare new CSV file if it doesn't exists
+if not exists(prices_filename):
+    with open(prices_filename, 'wt', encoding='utf-8', newline='') as prices_file:
+        writer = csv.DictWriter(prices_file, delimiter=';', fieldnames=fieldnames)
+        writer.writeheader()
+# If it exists, get list of existing dates in order to only append new dates
+else:
+     with open(prices_filename, 'rt', encoding='utf-8') as prices_csv_file:
+        reader = csv.DictReader(prices_csv_file, delimiter=';')
+        for row in reader:
+            date = row['date']
             if date not in datelist:
                 datelist.append(date)
-                finalresult += '"' + date + '"' + ";" + '"' + \
-                    price + '"' + ";" + '"' + share[0] + '"' + "\n"
 
-# WRITE CSV OUTPUT TO FILE #
-with open(prices_filename, "w", newline='', encoding='utf8') as fout:
-    fout.write(finalresult)
+# Prepare session for requests
+session = requests.Session()
+
+# Loop to request historical prices and add to csv
+with open(prices_filename, 'a', encoding='utf-8', newline='') as prices_csv_file:
+    writer = csv.DictWriter(prices_csv_file, delimiter=';', fieldnames=fieldnames)
+    for share in sharelist:
+        instrument = share[0]
+        url = 'https://api.prod.nntech.io/market-data/price-time-series/v2/period/YEAR_5/identifier/' + \
+            share[1]
+        params = {'resolution': 'DAY'}
+        data = session.get(url, params=params)
+        jsondecode = data.json()
+        for day in jsondecode['pricePoints']:
+            timestamp = day['timeStamp']
+            date_datetime = datetime.fromtimestamp(timestamp / 1000)
+            date = datetime.strftime(date_datetime, '%Y-%m-%d')
+            if date not in datelist:
+                row = {
+                    'instrument': instrument,
+                    'date': date,
+                    'high': str(day['high']).replace(".", ","),
+                    'low': str(day['low']).replace(".", ","),
+                    'open': str(day['open']).replace(".", ","),
+                    'last': str(day['last']).replace(".", ","),
+                    'volume': str(day['volume']).replace(".", ","),
+                }
+                writer.writerow(row)
