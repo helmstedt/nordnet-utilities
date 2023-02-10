@@ -28,6 +28,7 @@ else:
 
 # Prepare session for requests
 session = requests.Session()
+session.headers['Origin'] = 'https://www.nordnet.dk'
 
 # Loop to request historical prices and add to csv
 with open(prices_filename, 'a', encoding='utf-8', newline='') as prices_csv_file:
