@@ -5,7 +5,7 @@ load_dotenv()
 
 # Nordnet user account credentials and accounts/portfolios names (choose yourself) and numbers.
 # To get account numbers go to https://www.nordnet.dk/transaktioner and change
-# between accounts. The number after "accid=" in the new URL is your account number.
+# between accounts. The number after "?accids%3D" in the URL is your account number.
 # If you have only one account, your account number is 1.
 user = os.getenv('nordnet_username', 'myusername')
 password = os.getenv('nordnet_password', 'mypassword')
