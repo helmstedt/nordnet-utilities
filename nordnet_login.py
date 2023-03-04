@@ -11,5 +11,12 @@ def nordnet_login(session):
 
     # Actual login
     url = 'https://www.nordnet.dk/api/2/authentication/basic/login'
-    session.post(url, data = {'username': user, 'password': password})
-    return session
+    login = session.post(url, data = {'username': user, 'password': password})
+    # Success
+    if login.status_code == 200:
+        return session
+    else:
+        print(f'Login to Nordnet failed with status code {login.status_code}. The response was:')
+        print(login.text)
+        print('Please check that you have correctly set up nordnet_configuration.py and enabled username/password logins on Nordnet')
+        return False
