@@ -17,6 +17,7 @@ if not exists(prices_filename):
     with open(prices_filename, 'wt', encoding='utf-8', newline='') as prices_file:
         writer = csv.DictWriter(prices_file, delimiter=';', fieldnames=fieldnames)
         writer.writeheader()
+
 # If it exists, get list of existing dates in order to only append new dates
 else:
      with open(prices_filename, 'rt', encoding='utf-8') as prices_csv_file:
@@ -37,7 +38,10 @@ with open(prices_filename, 'a', encoding='utf-8', newline='') as prices_csv_file
         instrument = share[0]
         url = 'https://api.prod.nntech.io/market-data/price-time-series/v2/period/YEAR_5/identifier/' + \
             share[1]
-        params = {'resolution': 'DAY'}
+        params = {
+            'resolution': 'DAY',
+            'enrichType': 'ALL'            
+            }
         data = session.get(url, params=params)
         jsondecode = data.json()
         for day in jsondecode['pricePoints']:
