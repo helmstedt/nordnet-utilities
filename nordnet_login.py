@@ -1,6 +1,10 @@
+import requests
 from nordnet_configuration import user, password
 
-def nordnet_login(session):
+def nordnet_login():
+    # Create session
+    session = requests.Session()
+    
     # Setting cookies prior to login by visiting login page
     url = 'https://www.nordnet.dk/logind'
     session.get(url)
@@ -14,6 +18,8 @@ def nordnet_login(session):
     login = session.post(url, data = {'username': user, 'password': password})
     # Success
     if login.status_code == 200:
+        bearer_token = login.headers['nn-jwt']
+        session.headers['authorization'] = f'Bearer {bearer_token}'
         return session
     else:
         print(f'Login to Nordnet failed with status code {login.status_code}. The response was:')

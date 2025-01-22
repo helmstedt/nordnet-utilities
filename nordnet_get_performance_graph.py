@@ -2,12 +2,10 @@
 # and extracting account performance as json data. One is based on standard
 # intervals. The other is based on a user-defined interval.
 # Storing and processing of returned data is left to you.
-import requests
 from nordnet_configuration import accounts
 from nordnet_login import nordnet_login
 
-session = requests.Session()
-session = nordnet_login(session)
+session = nordnet_login()
 if session:
     accounts_list = [value for value in accounts.values()]
 

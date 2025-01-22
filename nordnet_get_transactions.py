@@ -1,13 +1,12 @@
 # This program logs into a Nordnet account and extracts transactions as a csv file.
 # Handy for exporting to Excel with as few manual steps as possible.
-import requests
-from datetime import datetime
-from datetime import date
+from datetime import datetime, date
+import csv
+import base64
 from nordnet_configuration import accounts, transactions_startdate, transactions_filename
 from nordnet_login import nordnet_login
 
-session = requests.Session()
-session = nordnet_login(session)
+session = nordnet_login()
 if session:
     today = date.today()
     enddate = datetime.strftime(today, '%Y-%m-%d')
@@ -16,24 +15,15 @@ if session:
     transactions = ''
 
     # GET ACCOUNT TRANSACTION DATA #
-
-    # Payload and url for transaction requests
-    payload = {
-        'locale': 'da-DK',
-        'from': transactions_startdate,
-        'to': enddate,
-    }
-
-    url = 'https://www.nordnet.dk/mediaapi/transaction/csv/filtered'
-
     firstaccount = True
     for portfolioname, id in accounts.items():
-        payload['account_id'] = id
-        data = session.get(url, params=payload)
-        result = data.content.decode('utf-16')
+        url = f'https://api.prod.nntech.io/transaction/transaction-and-notes/v1/transactions/csv/filter?accids={id}&fromDate={transactions_startdate}&toDate={enddate}&sort=ACCOUNTING_DATE&sortOrder=DESC&includeCancellations=false'
+        data = session.get(url)
+        response_bytes = data.json()['bytes']
+        decoded_bytes = base64.b64decode(response_bytes)
+        result = decoded_bytes.decode('utf-16')
         result = result.replace('\t', ';')
         result = result.splitlines()
-
         firstline = True
         for line in result:
             # For first account and first line, we use headers and add an additional column
